@@ -1,0 +1,45 @@
+{
+  "name": "chess-analyser",
+  "productName": "ChessAnalyser",
+  "version": "0.1.0",
+  "description": "GUI for analysis of chess games, with automatic move classification.",
+  "keywords": [
+    "chess",
+    "board",
+    "game",
+    "move",
+    "analysis",
+    "evaluation",
+    "review",
+    "classification",
+    "annotation",
+    "engine",
+    "stockfish",
+    "chessground",
+    "electron",
+    "vue",
+    "javascript"
+  ],
+  "repository": "https://github.com/adamsol/ChessAnalyser",
+  "license": "GPL-3.0",
+  "author": {
+    "name": "Adam Sołtysik",
+    "url": "https://github.com/adamsol"
+  },
+  "scripts": {
+    "test": "vitest",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "chess.js": "^1.0.0-beta.6",
+    "chessground": "^8.3.7",
+    "electron": "^24.3.1",
+    "electron-context-menu": "^3.6.1",
+    "lodash-es": "^4.17.21",
+    "vue": "^3.3.4"
+  },
+  "devDependencies": {
+    "vitest": "^0.32.0"
+  },
+  "main": "main.js"
+}
