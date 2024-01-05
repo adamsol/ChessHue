@@ -1,12 +1,13 @@
 
 const { spawn } = require('child_process');
 const { EOL } = require('os');
+const path = require('path');
 
 const { Chess } = require('chess.js');
 
 class Engine {
-    constructor(path, callback) {
-        this.process = spawn(path);
+    constructor(filepath, callback) {
+        this.process = spawn(path.resolve(__dirname, filepath));
         this.process.stdout.setEncoding('utf8');
         this.process.stdout.on('data', buffer => {
             for (const line of buffer.split(/\r?\n/g)) {

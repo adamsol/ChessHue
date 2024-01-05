@@ -130,7 +130,7 @@ const app = createApp({
             return this.strayed_off_game === 0 ? this.move_colors[this.current_move-1] : undefined;
         },
     },
-    mounted() {
+    async mounted() {
         window.electron.setEvaluationCallback((engine_lines, depth) => {
             const length = app.$data.engine_lines.length;
             app.$data.engine_lines = engine_lines;
@@ -154,6 +154,15 @@ const app = createApp({
                 this.flip();
             }
         });
+        const url = await window.electron.getProtocolUrl();
+        if (url) {
+            const [pgn_or_fen, color] = url.split('/');
+            this.pgn_or_fen = pgn_or_fen;
+            if (color[0] === 'b') {
+                this.flip();
+            }
+            this.load();
+        }
     },
     methods: {
         setIndex(name, new_value) {
