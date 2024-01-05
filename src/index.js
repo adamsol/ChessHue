@@ -3,12 +3,12 @@ import { Chess, DEFAULT_POSITION } from '../node_modules/chess.js/dist/esm/chess
 import Chessground from '../node_modules/chessground/index.js';
 import { createApp } from '../node_modules/vue/dist/vue.esm-browser.js';
 
-import { ANNOTATION_SVGS, ANNOTATION_SYMBOLS, classify } from './classification.js';
+import { gradeMove } from './review.js';
 
 const app = createApp({
     template: `
         <div style="display: flex; gap: 10px">
-            <div :class="[strayed_off_game > 0 ? 'strayed-off-game' : '', current_move_class]">
+            <div :class="[strayed_off_game > 0 ? 'strayed-off-game' : '', current_move_color]">
                 <div ref="chessground" style="width: 900px; height: 0; padding-bottom: 100%; resize: horizontal; overflow: hidden" />
             </div>
 
@@ -39,17 +39,16 @@ const app = createApp({
                             {{ (start_ply_number + i + 1) / 2 }}.
                         </span>
                         <span
-                            :class="move_classes[i]"
                             style="font-weight: bold; cursor: pointer"
                             :style="{
-                                'color': 'var(--' + move_classes[i] + ')',
+                                'color': move_colors[i],
                                 'border': strayed_off_game === 0 && current_move === i+1 ? '2px solid currentColor' : '2px solid transparent',
                                 'border-radius': '4px',
                                 'padding': '2px',
                             }"
                             @click="setIndex('strayed_off_game', 0); setIndex('current_move', i+1)"
                         >
-                            {{ san }}{{ ANNOTATION_SYMBOLS[move_classes[i]] }}
+                            {{ san }}
                         </span>
                     </template>
                 </div>
@@ -108,8 +107,6 @@ const app = createApp({
         </div>
     `,
     data: () => ({
-        ANNOTATION_SYMBOLS,
-
         analysis_multipv: 3,
         analysis_depth: 20,
         engine_lines: [],
@@ -123,14 +120,14 @@ const app = createApp({
 
         review_depth: 12,
         review_progress: undefined,
-        move_classes: [],
+        move_colors: [],
     }),
     computed: {
         reviewing() {
             return this.review_progress !== undefined;
         },
-        current_move_class() {
-            return this.strayed_off_game === 0 ? this.move_classes[this.current_move-1] : undefined;
+        current_move_color() {
+            return this.strayed_off_game === 0 ? this.move_colors[this.current_move-1] : undefined;
         },
     },
     mounted() {
@@ -210,7 +207,7 @@ const app = createApp({
             this.move_history = chess.history();
             this.current_move += this.strayed_off_game;
             this.strayed_off_game = 0;
-            this.move_classes = [];
+            this.move_colors = [];
         },
         load() {
             if (this.pgn_or_fen.startsWith('[') || !this.pgn_or_fen.includes('/')) {
@@ -221,7 +218,7 @@ const app = createApp({
             this.move_history = chess.history();
             this.current_move = 0;
             this.strayed_off_game = 0;
-            this.move_classes = [];
+            this.move_colors = [];
 
             while (chess.undo()) {}
             this.start_ply_number = chess.moveNumber() * 2 - (chess.turn() === 'w' ? 1 : 0);
@@ -236,10 +233,10 @@ const app = createApp({
             for (const san of this.move_history) {
                 review_chess.move(san);
             }
-            const options = { depth: this.review_depth, multipv: 2 };
+            const options = { depth: this.review_depth };
             let engine_lines = await window.electron.evaluateForMoveClassification(review_chess.fen(), options);
 
-            const classes = [];
+            const colors = [];
 
             // Running the analysis backwards (starting from the last move) seems to make engine evaluations more consistent,
             // especially when tricky sacrifices are concerned.
@@ -248,14 +245,14 @@ const app = createApp({
             while (move = review_chess.undo()) {
                 const prev_engine_lines = await window.electron.evaluateForMoveClassification(review_chess.fen(), options);
 
-                classes.push(classify(move, prev_engine_lines, engine_lines));
+                colors.push(gradeMove(move, prev_engine_lines[0], engine_lines[0]));
                 this.review_progress += 1;
 
-                console.log(review_chess.moveNumber(), move.san, [...prev_engine_lines], [...engine_lines], classes.at(-1));
+                console.log(review_chess.moveNumber(), move.san, [...prev_engine_lines], [...engine_lines], colors.at(-1));
 
                 engine_lines = prev_engine_lines;
             }
-            this.move_classes = classes.reverse();
+            this.move_colors = colors.reverse();
             this.updateGround();
 
             await new Promise(r => setTimeout(r, 100));
@@ -270,7 +267,6 @@ const app = createApp({
         updateGround() {
             const color = chess.turn() === 'w' ? 'white' : 'black';
             const last_move = chess.history({ verbose: true }).at(-1);
-            const annotation_svg = ANNOTATION_SVGS[this.current_move_class];
 
             const dests = new Map();
             for (const move of chess.moves({ verbose: true })) {
@@ -293,9 +289,13 @@ const app = createApp({
                 },
                 drawable: {
                     // https://github.com/lichess-org/chessground/issues/165
-                    autoShapes: annotation_svg ? [{
+                    autoShapes: this.current_move_color ? [{
                         orig: last_move.to,
-                        customSvg: annotation_svg,
+                        customSvg: `
+                            <g class="annotation">
+                                <circle fill="${this.current_move_color}" cx="50" cy="50" r="50" stroke="#fff" stroke-width="5" />
+                            </g>
+                        `,
                     }] : [],
                 },
                 animation: {

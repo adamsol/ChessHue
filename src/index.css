@@ -48,32 +48,13 @@ cg-board {
     background-color: #a5b1c9;
 }
 
-:root {
-    --brilliant: #24c3bd;
-    --great: #4887eb;
-    --mistake: #d59122;
-    --blunder: #e1573a;
-}
-
 .last-move.last-move {
     background-color: #7fb01c;
     opacity: 40%;
 }
-.brilliant .last-move {
-    background-color: var(--brilliant);
-}
-.great .last-move {
-    background-color: var(--great);
-}
-.mistake .last-move {
-    background-color: var(--mistake);
-}
-.blunder .last-move {
-    background-color: var(--blunder);
-}
 
 .annotation {
-    transform: translate(72px, -12px) scale(0.4);
+    transform: translate(73px, 2px) scale(0.25);
 }
 .annotation, .annotation > path {
     filter: drop-shadow(3px 3px 3px #0006);
