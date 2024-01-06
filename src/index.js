@@ -190,6 +190,7 @@ const app = createApp({
         },
         goForward() {
             if (this.strayed_off_game === 0 && this.current_move < this.move_history.length) {
+                this.playSound(this.move_history[this.current_move]);
                 this.setIndex('current_move', this.current_move + 1);
             }
         },
@@ -323,10 +324,20 @@ const app = createApp({
                         } else {
                             this.strayed_off_game += 1;
                         }
+                        this.playSound(move.san);
                         this.update();
                     },
                 },
             });
+        },
+        playSound(san) {
+            let name;
+            if (san.includes('x')) {
+                name = 'capture';
+            } else {
+                name = 'move';
+            }
+            new Audio(`../assets/sound/${name}.mp3`).play();
         },
         update() {
             this.updateEvaluation();
