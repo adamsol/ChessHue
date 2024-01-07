@@ -3,13 +3,42 @@ import { Chess, DEFAULT_POSITION } from '../node_modules/chess.js/dist/esm/chess
 import Chessground from '../node_modules/chessground/index.js';
 import { createApp } from '../node_modules/vue/dist/vue.esm-browser.js';
 
+import { calculateMaterialDifference } from './material.js';
 import { gradeMove } from './review.js';
 
 const app = createApp({
+    components: {
+        'material-difference': {
+            template: `
+                <div style="height: 30px; display: flex; gap: 15px; align-items: center">
+                    <div v-for="(count, type) in pieces">
+                        <img v-for="_ in count" :alt="type" :src="'../assets/piece/' + type + '.svg'" style="height: 30px; margin-right: -10px">
+                    </div>
+                    <div v-if="value > 0">
+                        +{{ value }}
+                    </div>
+                </div>
+            `,
+            props: {
+                pieces: { type: Object, required: true },
+                value: { type: Number, required: true },
+            },
+        },
+    },
     template: `
         <div style="display: flex; gap: 10px">
-            <div :class="[strayed_off_game > 0 ? 'strayed-off-game' : '', current_move_color]">
-                <div ref="chessground" style="width: 900px; height: 0; padding-bottom: 100%; resize: horizontal; overflow: hidden" />
+            <div style="display: flex; flex-direction: column">
+                <material-difference
+                    :pieces="material_difference[flipped ? 'white' : 'black']"
+                    :value="material_difference.value * (flipped ? 1 : -1)"
+                />
+                <div :class="[strayed_off_game > 0 ? 'strayed-off-game' : '', current_move_color]">
+                    <div ref="chessground" style="width: 900px; height: 0; padding-bottom: 100%; resize: horizontal; overflow: hidden" />
+                </div>
+                <material-difference
+                    :pieces="material_difference[flipped ? 'black' : 'white']"
+                    :value="material_difference.value * (flipped ? -1 : 1)"
+                />
             </div>
 
             <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px">
@@ -111,12 +140,14 @@ const app = createApp({
         analysis_depth: 20,
         engine_lines: [],
         current_depth: 0,
+        material_difference: calculateMaterialDifference(new Chess()),
 
         pgn_or_fen: '',
         start_ply_number: 1,
         move_history: [],
         current_move: 0,
         strayed_off_game: 0,
+        flipped: false,
 
         review_depth: 12,
         review_progress: undefined,
@@ -207,7 +238,7 @@ const app = createApp({
             }
         },
         flip() {
-            flipped = !flipped;
+            this.flipped = !this.flipped;
             this.updateGround();
         },
         copyFen() {
@@ -286,7 +317,7 @@ const app = createApp({
             // https://github.com/lichess-org/chessground/blob/v8.3.7/src/state.ts
             ground.set({
                 fen: chess.fen(),
-                orientation: flipped ? 'black' : 'white',
+                orientation: this.flipped ? 'black' : 'white',
                 turnColor: color,
                 lastMove: last_move && [last_move.from, last_move.to],
                 movable: {
@@ -342,12 +373,12 @@ const app = createApp({
         update() {
             this.updateEvaluation();
             this.updateGround();
+            this.material_difference = calculateMaterialDifference(chess);
         },
     },
 }).mount('#app');
 
 const chess = new Chess();
 const ground = Chessground(app.$refs.chessground);
-let flipped = false;
 
 app.update();

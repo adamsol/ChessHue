@@ -1,0 +1,1 @@
+https://github.com/lichess-org/lila/tree/8681f2b193662bc43d4da43042dcb98ca25d4ad8/public/piece/mono
