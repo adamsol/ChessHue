@@ -5,8 +5,11 @@ const path = require('path');
 
 const { app, BrowserWindow, ipcMain } = require('electron');
 const contextMenu = require('electron-context-menu');
+const Store = require('electron-store');
 
 const { Engine } = require('./src/engine');
+
+Store.initRenderer();
 
 app.whenReady().then(async () => {
     contextMenu();
@@ -14,6 +17,7 @@ app.whenReady().then(async () => {
     const window = new BrowserWindow({
         webPreferences: {
             preload: path.join(__dirname, 'src/preload.js'),
+            sandbox: false,  // https://github.com/sindresorhus/electron-store/issues/268#issuecomment-1809555869
         },
     });
     window.maximize();

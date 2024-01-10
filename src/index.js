@@ -44,13 +44,25 @@ const app = createApp({
             <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px">
                 <div class="flex-row">
                     Number of lines:
-                    <input v-model="analysis_multipv" type="number" step="1" min="1" @change="updateEvaluation" />
+                    <input
+                        v-model="analysis_multipv"
+                        type="number"
+                        step="1"
+                        min="1"
+                        @change="updateEvaluation(); updateStore('analysis_multipv')"
+                    />
                 </div>
                 <div class="flex-row">
                     Depth:
                     {{ current_depth }}
                     /
-                    <input v-model="analysis_depth" type="number" step="2" min="2" @change="updateEvaluation" />
+                    <input
+                        v-model="analysis_depth"
+                        type="number"
+                        step="2"
+                        min="2"
+                        @change="updateEvaluation(); updateStore('analysis_depth')"
+                    />
                 </div>
                 <div v-for="line in engine_lines">
                     <template v-if="line">
@@ -109,7 +121,13 @@ const app = createApp({
                         Review
                     </button>
                     Depth:
-                    <input v-model="review_depth" type="number" step="2" min="2" />
+                    <input
+                        v-model="review_depth"
+                        type="number"
+                        step="2"
+                        min="2"
+                        @change="updateStore('review_depth')"
+                    />
                 </div>
                 <div v-if="reviewing">
                     <progress :max="move_history.length" :value="review_progress" style="width: 100%" />
@@ -136,8 +154,8 @@ const app = createApp({
         </div>
     `,
     data: () => ({
-        analysis_multipv: 3,
-        analysis_depth: 20,
+        analysis_multipv: window.electron.store.get('analysis_multipv', 3),
+        analysis_depth: window.electron.store.get('analysis_depth', 20),
         engine_lines: [],
         current_depth: 0,
         material_difference: calculateMaterialDifference(new Chess()),
@@ -149,7 +167,7 @@ const app = createApp({
         strayed_off_game: 0,
         flipped: false,
 
-        review_depth: 12,
+        review_depth: window.electron.store.get('review_depth', 12),
         review_progress: undefined,
         move_colors: [],
     }),
@@ -374,6 +392,9 @@ const app = createApp({
             this.updateEvaluation();
             this.updateGround();
             this.material_difference = calculateMaterialDifference(chess);
+        },
+        updateStore(name) {
+            window.electron.store.set(name, this[name]);
         },
     },
 }).mount('#app');
