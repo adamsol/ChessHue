@@ -203,6 +203,16 @@ const app = createApp({
                 this.flip();
             }
         });
+        window.addEventListener('mousedown', event => {
+            if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
+                return;
+            }
+            if (event.button === 3) {
+                this.goBackward();
+            } else if (event.button === 4) {
+                this.goForward();
+            }
+        });
         const url = await window.electron.getProtocolUrl();
         if (url) {
             const [pgn_or_fen, color] = url.split('/');
