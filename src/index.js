@@ -206,7 +206,7 @@ const app = createApp({
             app.$data.current_depth = depth;
         });
         window.addEventListener('keydown', event => {
-            if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
+            if (['INPUT', 'TEXTAREA'].includes(event.target.tagName) && event.target.type !== 'checkbox') {
                 return;
             }
             if (event.key === 'ArrowLeft') {
@@ -227,9 +227,6 @@ const app = createApp({
             }
         });
         window.addEventListener('mousedown', event => {
-            if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-                return;
-            }
             if (event.button === 3) {
                 this.goBackward();
             } else if (event.button === 4) {
@@ -408,6 +405,9 @@ const app = createApp({
                     move: (from, to) => {
                         // TODO: promotion selector
                         this.move({ from, to, promotion: 'q' });
+                    },
+                    select() {
+                        document.activeElement.blur();
                     },
                 },
             });
