@@ -140,13 +140,19 @@ const app = createApp({
                         spellcheck="false"
                         style="font-family: inherit; width: 100%; resize: vertical"
                     />
-                    <div class="flex-row">
+                    <div class="flex-row" style="gap: 12px">
                         <button :disabled="reviewing" @click="load()">
                             Load
                         </button>
-                        <button :disabled="reviewing" @click="load(); review()">
-                            Load & review
-                        </button>
+                        <label>
+                            <input
+                                v-model="auto_review"
+                                type="checkbox"
+                                style="opacity: 80%"
+                                @change="updateStore('auto_review')"
+                            />
+                            Auto review
+                        </label>
                     </div>
                 </div>
             </div>
@@ -167,6 +173,7 @@ const app = createApp({
         flipped: false,
 
         review_depth: window.electron.store.get('review_depth', 12),
+        auto_review: window.electron.store.get('auto_review', false),
         review_progress: undefined,
         move_colors: [],
     }),
@@ -297,8 +304,15 @@ const app = createApp({
             this.start_ply_number = chess.moveNumber() * 2 - (chess.turn() === 'w' ? 1 : 0);
 
             this.update();
+
+            if (this.auto_review) {
+                this.review();
+            }
         },
         async review() {
+            if (this.move_history.length === 0) {
+                return;
+            }
             this.review_progress = 0;
 
             const review_chess = new Chess();
