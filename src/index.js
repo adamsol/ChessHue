@@ -64,11 +64,10 @@ const app = createApp({
                         @change="updateEvaluation(); updateStore('analysis_depth')"
                     />
                 </div>
-                <div v-for="line in engine_lines">
-                    <template v-if="line">
+                <div v-for="line in engine_lines" style="height: 20px">
+                    <div v-if="line" style="cursor: pointer; user-select: none" @click="move(line.move)">
                         {{ line.score }} | {{ line.move }}
-                    </template>
-                    &nbsp;
+                    </div>
                 </div>
                 <hr />
                 <div v-if="move_history.length > 0" style="display: flex; flex-wrap: wrap; align-items: baseline; margin-bottom: 6px">                    
@@ -201,6 +200,11 @@ const app = createApp({
                 this.fastForward();
             } else if (event.key === 'f') {
                 this.flip();
+            } else if (/^\d$/.test(event.key)) {
+                const line = this.engine_lines[+event.key - 1];
+                if (line) {
+                    this.move(line.move);
+                }
             }
         });
         window.addEventListener('mousedown', event => {
@@ -373,21 +377,24 @@ const app = createApp({
                 events: {
                     move: (from, to) => {
                         // TODO: promotion selector
-                        const move = chess.move({ from, to, promotion: 'q' });
-                        if (this.current_move === this.move_history.length) {
-                            this.move_history.length = this.current_move;
-                            this.move_history.push(move.san);
-                            this.current_move += 1;
-                        } else if (this.strayed_off_game === 0 && move.san === this.move_history[this.current_move]) {
-                            this.current_move += 1;
-                        } else {
-                            this.strayed_off_game += 1;
-                        }
-                        this.playSound(move.san);
-                        this.update();
+                        this.move({ from, to, promotion: 'q' });
                     },
                 },
             });
+        },
+        move(san_or_object) {
+            const move = chess.move(san_or_object);
+            if (this.current_move === this.move_history.length) {
+                this.move_history.length = this.current_move;
+                this.move_history.push(move.san);
+                this.current_move += 1;
+            } else if (this.strayed_off_game === 0 && move.san === this.move_history[this.current_move]) {
+                this.current_move += 1;
+            } else {
+                this.strayed_off_game += 1;
+            }
+            this.playSound(move.san);
+            this.update();
         },
         playSound(san) {
             let name;
