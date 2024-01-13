@@ -1,22 +1,21 @@
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
-const path = require('path');
+import path from 'path';
 
-const { app, BrowserWindow, ipcMain } = require('electron');
-const contextMenu = require('electron-context-menu');
-const Store = require('electron-store');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import initContextMenu from 'electron-context-menu';
+import Store from 'electron-store';
 
-const { Engine } = require('./src/engine');
+import { Engine } from './src/engine.js';
 
+initContextMenu();
 Store.initRenderer();
 
 app.whenReady().then(async () => {
-    contextMenu();
-
     const window = new BrowserWindow({
         webPreferences: {
-            preload: path.join(__dirname, 'src/preload.js'),
+            preload: path.join(app.getAppPath(), 'preload.cjs'),
             sandbox: false,  // https://github.com/sindresorhus/electron-store/issues/268#issuecomment-1809555869
         },
     });
@@ -27,10 +26,10 @@ app.whenReady().then(async () => {
 
     ipcMain.handle('get-protocol-url', () => decodeURIComponent(process.argv[2]?.split('://')[1] ?? ''));
 
-    const move_classification_engine = new Engine('../engine.exe');
+    const move_classification_engine = new Engine();
     ipcMain.handle('evaluate-for-move-classification', async (event, ...args) => move_classification_engine.evaluate(...args));
 
-    const live_analysis_engine = new Engine('../engine.exe', (...args) => window.webContents.send('evaluation-callback', ...args));
+    const live_analysis_engine = new Engine((...args) => window.webContents.send('evaluation-callback', ...args));
     ipcMain.handle('evaluate-for-live-analysis', async (event, ...args) => live_analysis_engine.evaluate(...args));
 
     await window.loadFile('src/index.html');

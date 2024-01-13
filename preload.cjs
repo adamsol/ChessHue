@@ -2,8 +2,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const Store = require('electron-store');
 
-// FIXME: warnings in the dev tools
-// https://github.com/sindresorhus/electron-store/issues/219
 const store = new Store();
 
 contextBridge.exposeInMainWorld('electron', {

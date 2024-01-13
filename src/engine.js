@@ -1,13 +1,17 @@
 
-const { spawn } = require('child_process');
-const { EOL } = require('os');
-const path = require('path');
+import { spawn } from 'child_process';
+import { EOL } from 'os';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const { Chess } = require('chess.js');
+import { Chess } from 'chess.js';
 
-class Engine {
-    constructor(filepath, callback) {
-        this.process = spawn(path.resolve(__dirname, filepath));
+// https://stackoverflow.com/a/50053801
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export class Engine {
+    constructor(callback) {
+        this.process = spawn(path.resolve(__dirname, '../engine.exe'));
         this.process.stdout.setEncoding('utf8');
         this.process.stdout.on('data', buffer => {
             for (const line of buffer.split(/\r?\n/g)) {
@@ -75,5 +79,3 @@ class Engine {
         return [...this.engine_lines];
     }
 }
-
-module.exports = { Engine };
