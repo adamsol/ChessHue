@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 
 import { Chess } from 'chess.js';
 
+import { generateRepetition } from './repetition.js';
+
 // https://stackoverflow.com/a/50053801
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -63,7 +65,7 @@ export class Engine {
         }
     }
 
-    async evaluate(fen, { multipv = 1, depth = 20 } = {}) {
+    async evaluate(fen, { multipv = 1, depth = 20, prevent_repetitions = false } = {}) {
         this.chess = new Chess(fen);
         this.engine_lines = [];
 
@@ -71,7 +73,15 @@ export class Engine {
         this._write('stop');
         this._write('isready');
 
-        this._write('position fen ' + fen);
+        let extra_moves_cmd = '';
+        if (prevent_repetitions) {
+            // An old discussion, for reference: https://github.com/official-stockfish/Stockfish/issues/948
+            const repetition = generateRepetition(this.chess);
+            if (repetition) {
+                extra_moves_cmd = ' moves ' + repetition.join(' ');
+            }
+        }
+        this._write('position fen ' + fen + extra_moves_cmd);
         this._write('setoption name MultiPV value ' + multipv);
         this._write('go depth ' + depth);
 

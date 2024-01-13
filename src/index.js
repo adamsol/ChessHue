@@ -42,27 +42,39 @@ const app = createApp({
             </div>
 
             <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px">
-                <div class="flex-row">
-                    Number of lines:
-                    <input
-                        v-model="analysis_multipv"
-                        type="number"
-                        step="1"
-                        min="1"
-                        @change="updateEvaluation(); updateStore('analysis_multipv')"
-                    />
-                </div>
-                <div class="flex-row">
-                    Depth:
-                    {{ current_depth }}
-                    /
-                    <input
-                        v-model="analysis_depth"
-                        type="number"
-                        step="2"
-                        min="2"
-                        @change="updateEvaluation(); updateStore('analysis_depth')"
-                    />
+                <div class="flex-row" style="column-gap: 12px">
+                    <div class="flex-row">
+                        Depth:
+                        <span style="width: 20px">
+                            {{ current_depth }}
+                        </span>
+                        /
+                        <input
+                            v-model="analysis_depth"
+                            type="number"
+                            step="2"
+                            min="2"
+                            @change="updateEvaluation(); updateStore('analysis_depth')"
+                        />
+                    </div>
+                    <div class="flex-row">
+                        Number of lines:
+                        <input
+                            v-model="analysis_multipv"
+                            type="number"
+                            step="1"
+                            min="1"
+                            @change="updateEvaluation(); updateStore('analysis_multipv')"
+                        />
+                    </div>
+                    <label>
+                        <input
+                            v-model="analysis_prevent_repetitions"
+                            type="checkbox"
+                            @change="updateEvaluation(); updateStore('analysis_prevent_repetitions')"
+                        />
+                        Prevent repetitions
+                    </label>
                 </div>
                 <div v-for="line in engine_lines" style="height: 20px">
                     <div v-if="line" style="cursor: pointer; user-select: none" @click="move(line.move)">
@@ -140,7 +152,7 @@ const app = createApp({
                         spellcheck="false"
                         style="font-family: inherit; width: 100%; resize: vertical"
                     />
-                    <div class="flex-row" style="gap: 12px">
+                    <div class="flex-row" style="column-gap: 12px">
                         <button :disabled="reviewing" @click="load()">
                             Load
                         </button>
@@ -148,7 +160,6 @@ const app = createApp({
                             <input
                                 v-model="auto_review"
                                 type="checkbox"
-                                style="opacity: 80%"
                                 @change="updateStore('auto_review')"
                             />
                             Auto review
@@ -159,8 +170,9 @@ const app = createApp({
         </div>
     `,
     data: () => ({
-        analysis_multipv: window.electron.store.get('analysis_multipv', 3),
         analysis_depth: window.electron.store.get('analysis_depth', 20),
+        analysis_multipv: window.electron.store.get('analysis_multipv', 3),
+        analysis_prevent_repetitions: window.electron.store.get('analysis_prevent_repetitions', false),
         engine_lines: [],
         current_depth: 0,
         material_difference: calculateMaterialDifference(new Chess()),
@@ -349,7 +361,11 @@ const app = createApp({
             this.engine_lines = new Array(this.analysis_multipv);
             this.current_depth = 0;
 
-            window.electron.evaluateForLiveAnalysis(chess.fen(), { depth: this.analysis_depth, multipv: this.analysis_multipv });
+            window.electron.evaluateForLiveAnalysis(chess.fen(), {
+                depth: this.analysis_depth,
+                multipv: this.analysis_multipv,
+                prevent_repetitions: this.analysis_prevent_repetitions,
+            });
         },
         updateGround() {
             const color = chess.turn() === 'w' ? 'white' : 'black';
