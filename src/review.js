@@ -1,7 +1,7 @@
 
 import tinycolor from '../node_modules/tinycolor2/esm/tinycolor.js';
 
-const ADVANTAGE_LIMIT = 20;
+const ADVANTAGE_LIMIT = 10;
 const LOSS_SCALE = 5;
 const COLORS = [
     ['#23b728', 0],
@@ -20,10 +20,10 @@ if (import.meta.vitest) {
     test('determineRelativeAdvantage', () => {
         expect(determineRelativeAdvantage('1.0', 'w')).toBe(1);
         expect(determineRelativeAdvantage('-4.75', 'b')).toBe(4.75);
-        expect(determineRelativeAdvantage('150', 'b')).toBe(-20);
-        expect(determineRelativeAdvantage('M1', 'w')).toBe(20);
-        expect(determineRelativeAdvantage('M-3', 'w')).toBe(-20);
-        expect(determineRelativeAdvantage('M-12', 'b')).toBe(20);
+        expect(determineRelativeAdvantage('150', 'b')).toBe(-10);
+        expect(determineRelativeAdvantage('M1', 'w')).toBe(10);
+        expect(determineRelativeAdvantage('M-3', 'w')).toBe(-10);
+        expect(determineRelativeAdvantage('M-12', 'b')).toBe(10);
     });
 }
 
