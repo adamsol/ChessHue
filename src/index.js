@@ -4,7 +4,7 @@ import Chessground from '../node_modules/chessground/index.js';
 import { createApp } from '../node_modules/vue/dist/vue.esm-browser.js';
 
 import { calculateMaterialDifference } from './material.js';
-import { gradeMove } from './review.js';
+import { getColor, gradeMove } from './review.js';
 
 const app = createApp({
     components: {
@@ -77,8 +77,14 @@ const app = createApp({
                     </label>
                 </div>
                 <div v-for="line in engine_lines" style="height: 20px">
-                    <div v-if="line" style="cursor: pointer; user-select: none" @click="move(line.move)">
-                        {{ line.score }} | {{ line.move }}
+                    <div
+                        v-if="line"
+                        style="cursor: pointer; user-select: none"
+                        @mouseover="hovered_move = line.move; updateGround()"
+                        @mouseleave="hovered_move = null; updateGround()"
+                        @click="hovered_move = null; move(line.move)"
+                    >
+                        {{ line.score }} | {{ line.move.san }}
                     </div>
                 </div>
                 <hr />
@@ -175,6 +181,8 @@ const app = createApp({
         analysis_prevent_repetitions: window.electron.store.get('analysis_prevent_repetitions', false),
         engine_lines: [],
         current_depth: 0,
+        evaluation_callback_update_timeout: null,
+        hovered_move: null,
         material_difference: calculateMaterialDifference(new Chess()),
 
         pgn_or_fen: '',
@@ -204,6 +212,11 @@ const app = createApp({
             app.$data.engine_lines.length = length;
 
             app.$data.current_depth = depth;
+
+            app.evaluation_callback_update_timeout ??= setTimeout(() => {
+                app.updateGround();
+                app.evaluation_callback_update_timeout = null;
+            }, 200);
         });
         window.addEventListener('keydown', event => {
             if (['INPUT', 'TEXTAREA'].includes(event.target.tagName) && event.target.type !== 'checkbox') {
@@ -222,7 +235,7 @@ const app = createApp({
             } else if (/^\d$/.test(event.key)) {
                 const line = this.engine_lines[+event.key - 1];
                 if (line) {
-                    this.move(line.move);
+                    this.move(line.move.san);
                 }
             }
         });
@@ -341,10 +354,11 @@ const app = createApp({
             while (move = review_chess.undo()) {
                 const prev_engine_lines = await window.electron.evaluateForMoveClassification(review_chess.fen(), options);
 
-                colors.push(gradeMove(move, prev_engine_lines[0], engine_lines[0]));
+                const grade = gradeMove(move, prev_engine_lines[0], engine_lines[0]);
+                colors.push(getColor(grade));
                 this.review_progress += 1;
 
-                console.log(review_chess.moveNumber(), move.san, [...prev_engine_lines], [...engine_lines], colors.at(-1));
+                console.log(review_chess.moveNumber(), move.san, [...prev_engine_lines], [...engine_lines], grade);
 
                 engine_lines = prev_engine_lines;
             }
@@ -373,7 +387,13 @@ const app = createApp({
                 dests.set(move.from, [...dests.get(move.from) ?? [], move.to]);
             }
 
+            const lines = this.hovered_move ? [{ score: '0', move: this.hovered_move }] : this.engine_lines.filter(x => x);
+            const getArrowScale = line => {
+                return Math.max(1 - gradeMove(line.move, lines[0], line), 0);
+            };
+
             // https://github.com/lichess-org/chessground/blob/v8.3.7/src/state.ts
+            // https://github.com/lichess-org/chessground/blob/v8.3.7/src/draw.ts
             ground.set({
                 fen: chess.fen(),
                 orientation: this.flipped ? 'black' : 'white',
@@ -388,15 +408,36 @@ const app = createApp({
                     enabled: false,
                 },
                 drawable: {
-                    // https://github.com/lichess-org/chessground/issues/165
-                    autoShapes: this.current_move_color ? [{
-                        orig: last_move.to,
-                        customSvg: `
-                            <g class="annotation">
-                                <circle fill="${this.current_move_color}" cx="50" cy="50" r="50" stroke="#fff" stroke-width="5" />
-                            </g>
-                        `,
-                    }] : [],
+                    autoShapes: [
+                        // Best move arrows
+                        ...lines.map((line, i) => ({
+                            orig: line.move.from,
+                            dest: line.move.to,
+                            brush: i === 0 ? 'paleBlue' : 'paleGrey',
+                            modifiers: { lineWidth: 15 * getArrowScale(line) },
+                        })).filter(obj => obj.modifiers.lineWidth >= 0.5),  // Values smaller than 0.5 are rounded to 0 and considered unset, defaulting to 15.
+
+                        // Best move promotion annotations
+                        ...lines.filter(line => line.move.promotion).map(line => ({
+                            orig: line.move.to,
+                            piece: {
+                                role: { q: 'queen', r: 'rook', b: 'bishop', n: 'knight' }[line.move.promotion],
+                                color,
+                                scale: getArrowScale(line),
+                            },
+                        })),
+
+                        // Review annotations
+                        // https://github.com/lichess-org/chessground/issues/165
+                        ...this.current_move_color ? [{
+                            orig: last_move.to,
+                            customSvg: `
+                                <g class="annotation">
+                                    <circle fill="${this.current_move_color}" cx="50" cy="50" r="50" stroke="#fff" stroke-width="5" />
+                                </g>
+                            `,
+                        }] : [],
+                    ],
                 },
                 animation: {
                     duration: 100,

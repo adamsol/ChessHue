@@ -64,7 +64,7 @@ if (import.meta.vitest) {
 }
 
 
-function getColor(loss) {
+export function getColor(loss) {
     for (let i = 0; i < COLORS.length; ++i) {
         if (loss <= COLORS[i+1][1]) {
             const t = (loss - COLORS[i][1]) / (COLORS[i+1][1] - COLORS[i][1]);
@@ -92,16 +92,15 @@ export function gradeMove(move, prev_engine_line, new_engine_line) {
     }
     const prev_value = determineRelativeAdvantage(prev_engine_line.score, move.color);
     const new_value = determineRelativeAdvantage(new_engine_line.score, move.color);
-    const loss = calculateLoss(prev_value, new_value);
-    return getColor(loss);
+    return calculateLoss(prev_value, new_value);
 }
 
 if (import.meta.vitest) {
     test('gradeMove', () => {
-        expect(gradeMove({}, { score: '1' }, { score: '1' })).toBe(COLORS[0][0]);
-        expect(gradeMove({ color: 'w' }, { score: '10' }, { score: '-2' })).toBe(blendColors(2, 0.2));
-        expect(gradeMove({ color: 'b' }, { score: 'M-1' }, { score: 'M1' })).toBe(COLORS[3][0]);
-        expect(gradeMove({ san: 'e4#', color: 'b' }, { score: 'M-1' })).toBe(COLORS[0][0]);
-        expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1' })).toBe(COLORS[2][0]);  // Stalemate
+        expect(gradeMove({}, { score: '1' }, { score: '1' })).toBe(0);
+        expect(gradeMove({ color: 'w' }, { score: '10' }, { score: '-2' })).toBe(1.2);
+        expect(gradeMove({ color: 'b' }, { score: 'M-1' }, { score: 'M1' })).toBe(2);
+        expect(gradeMove({ san: 'e4#', color: 'b' }, { score: 'M-1' })).toBe(0);
+        expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1' })).toBe(1);  // Stalemate
     });
 }

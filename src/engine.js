@@ -53,7 +53,7 @@ export class Engine {
 
             // Sometimes, despite the `ready_counter` variable, a stray line concerning the previous position is received.
             try {
-                const move = this.chess.move(cmd[cmd.indexOf('pv')+1]).san;
+                const move = this.chess.move(cmd[cmd.indexOf('pv')+1]);
                 this.chess.undo();
 
                 this.engine_lines[cmd[cmd.indexOf('multipv')+1]-1] = { score, move };
