@@ -83,7 +83,9 @@ if (import.meta.vitest) {
 
 
 export function gradeMove(move, prev_engine_line, new_engine_line) {
-    if (!new_engine_line) {
+    if (move.san === prev_engine_line.move.san) {
+        new_engine_line = prev_engine_line;
+    } else if (!new_engine_line) {
         if (move.san.endsWith('#')) {
             new_engine_line = prev_engine_line;
         } else {
@@ -92,15 +94,17 @@ export function gradeMove(move, prev_engine_line, new_engine_line) {
     }
     const prev_value = determineRelativeAdvantage(prev_engine_line.score, move.color);
     const new_value = determineRelativeAdvantage(new_engine_line.score, move.color);
-    return calculateLoss(prev_value, new_value);
+    return Math.max(calculateLoss(prev_value, new_value), 0);
 }
 
 if (import.meta.vitest) {
     test('gradeMove', () => {
-        expect(gradeMove({}, { score: '1' }, { score: '1' })).toBe(0);
-        expect(gradeMove({ color: 'w' }, { score: '10' }, { score: '-2' })).toBe(1.2);
-        expect(gradeMove({ color: 'b' }, { score: 'M-1' }, { score: 'M1' })).toBe(2);
-        expect(gradeMove({ san: 'e4#', color: 'b' }, { score: 'M-1' })).toBe(0);
-        expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1' })).toBe(1);  // Stalemate
+        expect(gradeMove({ san: 'e4' }, { score: '1', move: {} }, { score: '1'})).toBe(0);
+        expect(gradeMove({ san: 'e4', color: 'w' }, { score: '1', move: { san: 'e4' } }, { score: '-5' })).toBe(0);
+        expect(gradeMove({ san: 'e4', color: 'b' }, { score: '1', move: {} }, { score: '-5' })).toBe(0);
+        expect(gradeMove({ san: 'e4', color: 'w' }, { score: '10', move: {} }, { score: '-2' })).toBe(1.2);
+        expect(gradeMove({ san: 'e4', color: 'b' }, { score: 'M-1', move: {} }, { score: 'M1' })).toBe(2);
+        expect(gradeMove({ san: 'e4#', color: 'b' }, { score: 'M-1', move: {} })).toBe(0);
+        expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1', move: {} })).toBe(1);  // Stalemate
     });
 }
