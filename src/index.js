@@ -312,10 +312,15 @@ const app = createApp({
             this.move_colors = [];
         },
         load() {
-            if (this.pgn_or_fen.startsWith('[') || !this.pgn_or_fen.includes('/')) {
+            try {
                 chess.loadPgn(this.pgn_or_fen);
-            } else {
-                chess.load(this.pgn_or_fen);
+            } catch (e1) {
+                try {
+                    chess.load(this.pgn_or_fen);
+                } catch (e2) {
+                    console.error(e1);
+                    console.error(e2);
+                }
             }
             this.move_history = chess.history();
             this.current_move = 0;
