@@ -3,39 +3,24 @@ import { Chess, DEFAULT_POSITION } from '../node_modules/chess.js/dist/esm/chess
 import Chessground from '../node_modules/chessground/index.js';
 import { createApp } from '../node_modules/vue/dist/vue.esm-browser.js';
 
+import MaterialDifference from './components/MaterialDifference.js';
+import MoveHistory from './components/MoveHistory/index.js';
 import { calculateMaterialDifference } from './material.js';
 import { getColor, gradeMove } from './review.js';
 
 const app = createApp({
-    components: {
-        'material-difference': {
-            template: `
-                <div style="height: 30px; display: flex; gap: 15px; align-items: center">
-                    <div v-for="(count, type) in pieces">
-                        <img v-for="_ in count" :alt="type" :src="'../assets/piece/' + type + '.svg'" style="height: 30px; margin-right: -10px">
-                    </div>
-                    <div v-if="value > 0">
-                        +{{ value }}
-                    </div>
-                </div>
-            `,
-            props: {
-                pieces: { type: Object, required: true },
-                value: { type: Number, required: true },
-            },
-        },
-    },
+    components: { MaterialDifference, MoveHistory },
     template: `
         <div style="display: flex; gap: 10px">
             <div style="display: flex; flex-direction: column">
-                <material-difference
+                <MaterialDifference
                     :pieces="material_difference[flipped ? 'white' : 'black']"
                     :value="material_difference.value * (flipped ? 1 : -1)"
                 />
                 <div :class="[strayed_off_game > 0 ? 'strayed-off-game' : '', current_move_color]">
                     <div ref="chessground" style="width: 900px; height: 0; padding-bottom: 100%; resize: horizontal; overflow: hidden" />
                 </div>
-                <material-difference
+                <MaterialDifference
                     :pieces="material_difference[flipped ? 'black' : 'white']"
                     :value="material_difference.value * (flipped ? -1 : 1)"
                 />
@@ -88,28 +73,13 @@ const app = createApp({
                     </div>
                 </div>
                 <hr />
-                <div v-if="move_history.length > 0" style="display: flex; flex-wrap: wrap; align-items: baseline; margin-bottom: 6px">                    
-                    <span v-if="start_ply_number % 2 === 0" style="color: gray; padding: 4px">
-                        {{ start_ply_number / 2 }}...
-                    </span>
-                    <template v-for="(san, i) in move_history">
-                        <span v-if="(start_ply_number + i) % 2 === 1" style="color: gray; padding: 4px">
-                            {{ (start_ply_number + i + 1) / 2 }}.
-                        </span>
-                        <span
-                            style="font-weight: bold; cursor: pointer"
-                            :style="{
-                                'color': move_colors[i],
-                                'border': strayed_off_game === 0 && current_move === i+1 ? '2px solid currentColor' : '2px solid transparent',
-                                'border-radius': '4px',
-                                'padding': '2px',
-                            }"
-                            @click="setIndex('strayed_off_game', 0); setIndex('current_move', i+1)"
-                        >
-                            {{ san }}
-                        </span>
-                    </template>
-                </div>
+                <MoveHistory
+                    :colors="move_colors"
+                    :current_index="strayed_off_game === 0 ? current_move : null"
+                    :moves="move_history"
+                    :start_ply_number="start_ply_number"
+                    @click="setIndex('strayed_off_game', 0); setIndex('current_move', $event+1)"
+                />
                 <div class="flex-row">
                     <button @click="fastBackward()">
                         &lt;&lt;
