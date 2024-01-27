@@ -443,6 +443,7 @@ const app = createApp({
                             `,
                         }] : [],
                     ],
+                    shapes: ground.state.drawable.shapes,
                 },
                 animation: {
                     duration: 100,
