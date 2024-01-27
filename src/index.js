@@ -450,7 +450,9 @@ const app = createApp({
             } else {
                 name = 'move';
             }
-            new Audio(`../assets/sound/${name}.mp3`).play();
+            const audio = new Audio(`../assets/sound/${name}.mp3`);
+            audio.volume = 0.7;
+            audio.play();
         },
         update() {
             this.updateEvaluation();
