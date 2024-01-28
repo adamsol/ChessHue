@@ -10,9 +10,9 @@ export default {
             </span>
         </span>
     `,
+    inject: ['start_ply_number'],
     props: {
         index: { type: Number, required: true },
-        start_ply_number: { type: Number, required: true },
     },
     emits: ['click'],
     data: () => ({

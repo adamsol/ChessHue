@@ -43,11 +43,15 @@ hr {
     align-items: baseline;
     gap: 4px;
 }
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
 
 cg-board {
     background-color: #8c9fc5;
 }
-.strayed-off-game cg-board {
+.variation cg-board {
     background-color: #a5b1c9;
 }
 
