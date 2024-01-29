@@ -2,8 +2,8 @@
 export default {
     template: `
         <div class="flex-row">
-            <button :disabled="reviewing" @click="runReview()">
-                Review
+            <button @click="reviewing ? review_progress = undefined : runReview()">
+                {{ reviewing ? 'Abort review' : 'Review' }}
             </button>
             Depth:
             <input

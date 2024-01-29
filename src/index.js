@@ -178,6 +178,9 @@ const app = createApp({
                 }
                 const options = { depth: this.review_depth };
                 let engine_lines = await electron.evaluateForMoveClassification(review_chess.fen(), options);
+                if (!this.reviewing) {
+                    return;
+                }
 
                 const colors = [];
 
@@ -187,7 +190,9 @@ const app = createApp({
                 let move;
                 while (move = review_chess.undo()) {
                     const prev_engine_lines = await electron.evaluateForMoveClassification(review_chess.fen(), options);
-
+                    if (!this.reviewing) {
+                        return;
+                    }
                     const grade = gradeMove(move, prev_engine_lines[0], engine_lines[0]);
                     colors.push(getColor(grade));
                     this.review_progress += 1;
