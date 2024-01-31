@@ -1,8 +1,8 @@
 
 import tinycolor from '../node_modules/tinycolor2/esm/tinycolor.js';
 
-const ADVANTAGE_LIMIT = 10;
-const LOSS_SCALE = 5;
+const ADVANTAGE_CUTOFF = 10;
+const SENSITIVITY_DIVIDER = 2.5;
 const COLORS = [
     ['#23b728', 0],
     ['#d59122', 0.5],
@@ -13,7 +13,7 @@ const COLORS = [
 
 function determineRelativeAdvantage(score, color) {
     const value = score.startsWith('M') ? Infinity * Math.sign(+score.slice(1)) : +score;
-    return Math.max(Math.min(value, ADVANTAGE_LIMIT), -ADVANTAGE_LIMIT) * (color === 'w' ? 1 : -1);
+    return Math.max(Math.min(value, ADVANTAGE_CUTOFF), -ADVANTAGE_CUTOFF) * (color === 'w' ? 1 : -1);
 }
 
 if (import.meta.vitest) {
@@ -31,15 +31,15 @@ if (import.meta.vitest) {
 function calculateLoss(prev_value, new_value) {
     const diff = prev_value - new_value;
     const divisor = Math.max(Math.abs(prev_value), Math.abs(new_value));
-    return diff / Math.max(divisor, LOSS_SCALE);
+    return diff / Math.max(divisor, SENSITIVITY_DIVIDER);
 }
 
 if (import.meta.vitest) {
     test('calculateLoss', () => {
         expect(calculateLoss(1, 1)).toBe(0);
-        expect(calculateLoss(1, -1)).toBe(0.4);
+        expect(calculateLoss(1, -1)).toBe(0.8);
         expect(calculateLoss(5, -2)).toBe(1.4);
-        expect(calculateLoss(3, 0)).toBe(0.6);
+        expect(calculateLoss(1.5, 0)).toBe(0.6);
         expect(calculateLoss(0, -10)).toBe(1);
         expect(calculateLoss(5, 3)).toBe(0.4);
         expect(calculateLoss(8, -4)).toBe(1.5);
