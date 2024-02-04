@@ -35,21 +35,24 @@ export default {
                 Prevent repetitions
             </label>
         </div>
-        <div v-for="line in engine_lines" style="height: 20px">
-            <div
-                v-if="line"
-                style="cursor: pointer; user-select: none"
-                @mouseover="hovered_move = line.move; updateGround()"
-                @mouseleave="hovered_move = null; updateGround()"
-                @click="hovered_move = null; makeMove(line.move)"
-            >
-                {{ line.score }} | {{ line.move.san }}
+        <div class="flex-column" style="align-items: start">
+            <div v-for="(line, i) in engine_lines" style="height: 28px">
+                <div
+                    v-if="line"
+                    style="cursor: pointer; user-select: none; padding: 4px; border-radius: 4px"
+                    :style="{ background: hovered_line_index === i ? '#fff2' : 'none' }"
+                    @mouseover="hovered_line_index = i; updateGround()"
+                    @mouseleave="hovered_line_index = null; updateGround()"
+                    @click="hovered_line_index = null; makeMove(line.move)"
+                >
+                    {{ line.score }} | {{ line.move.san }}
+                </div>
             </div>
         </div>
     `,
     inject: [
         'analysis_depth', 'analysis_multipv', 'analysis_prevent_repetitions',
-        'current_depth', 'engine_lines', 'hovered_move',
+        'current_depth', 'engine_lines', 'hovered_line_index',
         'makeMove', 'updateEvaluation', 'updateStore', 'updateGround',
     ],
     mounted() {

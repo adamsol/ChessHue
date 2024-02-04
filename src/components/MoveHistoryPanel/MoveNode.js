@@ -2,14 +2,15 @@
 export default {
     template: `
         <span
-            style="font-weight: bold; cursor: pointer"
+            style="font-weight: bold; cursor: pointer; padding: 2px; border-radius: 4px"
             :style="{
-                'color': color,
-                'border': is_current ? '2px solid currentColor' : '2px solid transparent',
-                'border-radius': '4px',
-                'padding': '2px',
+                color: color,
+                background: hovered ? '#fff2' : 'none',
+                border: is_current ? '2px solid currentColor' : '2px solid transparent',
             }"
             @click="$emit('click')"
+            @mouseover="hovered = true"
+            @mouseleave="hovered = false"
         >
             {{ san }}
         </span>
@@ -20,4 +21,7 @@ export default {
         san: { type: String, required: true },
     },
     emits: ['click'],
+    data: () => ({
+        hovered: false,
+    }),
 };

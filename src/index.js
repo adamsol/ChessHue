@@ -59,7 +59,6 @@ const app = createApp({
             const length = this.engine_lines.length;
             this.engine_lines = engine_lines;
             this.engine_lines.length = length;
-
             this.current_depth = depth;
 
             evaluation_callback_update_timeout ??= setTimeout(() => {
@@ -87,7 +86,7 @@ const app = createApp({
             analysis_prevent_repetitions: electron.store.get('analysis_prevent_repetitions', false),
             engine_lines: [],
             current_depth: 0,
-            hovered_move: null,
+            hovered_line_index: null,
 
             pgn_or_fen: '',
             start_ply_number: 1,
@@ -210,6 +209,7 @@ const app = createApp({
             updateEvaluation() {
                 this.engine_lines = new Array(this.analysis_multipv);
                 this.current_depth = 0;
+                this.hovered_line_index = null;
 
                 electron.evaluateForLiveAnalysis(chess.fen(), {
                     depth: this.analysis_depth,
@@ -226,7 +226,10 @@ const app = createApp({
                     dests.set(move.from, [...dests.get(move.from) ?? [], move.to]);
                 }
 
-                const lines = this.hovered_move ? [{ score: '0', move: this.hovered_move }] : this.engine_lines.filter(x => x);
+                const lines = this.hovered_line_index === null ?
+                    this.engine_lines.filter(x => x) :
+                    [{ score: '0', move: this.engine_lines[this.hovered_line_index].move }]
+                ;
                 const getArrowScale = line => {
                     return Math.max(1 - gradeMove(line.move, lines[0], line), 0);
                 };
