@@ -55,6 +55,33 @@ cg-board {
     background-color: #a5b1c9;
 }
 
+.cg-wrap coords {
+    font-size: 20px;
+    font-weight: bold;
+    user-select: none;
+}
+.cg-wrap coords.files {
+    left: 0;
+    bottom: 0;
+    align-items: end;
+    text-align: right;
+    text-transform: none;
+}
+.cg-wrap coords.files coord {
+    flex-basis: 0;
+    padding-right: 3px;
+    padding-bottom: 1px;
+}
+.cg-wrap coords.ranks {
+    left: 0;
+    top: 0;
+}
+.cg-wrap coords.ranks coord {
+    padding-top: 2px;
+    padding-left: 3px;
+    transform: none;
+}
+
 .last-move.last-move {
     background-color: #7fb01c;
     opacity: 40%;
