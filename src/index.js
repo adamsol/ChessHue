@@ -36,7 +36,11 @@ const app = createApp({
             <div class="flex-column">
                 <MaterialDifferencePanel :color="board_flipped ? 'white' : 'black'" />
                 <div :class="{ variation: variation_move_index > 0 }">
-                    <div ref="chessground" style="width: 900px; height: 0; padding-bottom: 100%; resize: horizontal; overflow: hidden" />
+                    <div
+                        ref="chessground"
+                        style="height: 0; padding-bottom: 100%; resize: horizontal; overflow: hidden"
+                        :style="{ width: board_size + 'px' }"
+                    />
                 </div>
                 <MaterialDifferencePanel :color="board_flipped ? 'black' : 'white'" />
             </div>
@@ -52,8 +56,12 @@ const app = createApp({
             </div>
         </div>
     `,
+    created() {
+        // This needs to be non-reactive to avoid an update loop.
+        this.board_size = electron.store.get('board_size', window.innerHeight * 0.7);
+    },
     async mounted() {
-        let evaluation_callback_update_timeout = null;
+        let evaluation_callback_update_timeout;
 
         electron.setEvaluationCallback((engine_lines, depth) => {
             const length = this.engine_lines.length;
@@ -76,6 +84,17 @@ const app = createApp({
             }
             this.load();
         }
+
+        let board_resize_timeout;
+
+        const observer = new ResizeObserver(mutations => {
+            clearTimeout(board_resize_timeout);
+            board_resize_timeout = setTimeout(() => {
+                this.board_size = mutations[0].contentRect.width;
+                this.updateStore('board_size');
+            }, 100);
+        });
+        observer.observe(this.$refs.chessground);
     },
     mixins: [provideReactively({
         data: {
