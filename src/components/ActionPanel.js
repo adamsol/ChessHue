@@ -42,7 +42,10 @@ export default {
                 this.fastForward();
             } else if (event.key === 'f') {
                 this.flipBoard();
+            } else {
+                return;
             }
+            event.preventDefault();
         });
         window.addEventListener('mousedown', event => {
             if (event.button === 3) {
