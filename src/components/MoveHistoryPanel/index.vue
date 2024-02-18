@@ -7,6 +7,7 @@
                 :color="move_colors[i]"
                 :is_current="variation_move_index === 0 && current_move_index === i+1"
                 :san
+                :title="move_evaluations[i]"
                 @click="setMoveIndex('variation_move_index', 0); setMoveIndex('current_move_index', i+1)"
             />
         </template>
@@ -20,7 +21,7 @@
     export default {
         components: { MoveNode, NumberNode },
         inject: [
-            'move_colors', 'current_move_index', 'variation_move_index', 'move_history',
+            'move_evaluations', 'move_colors', 'current_move_index', 'variation_move_index', 'move_history',
             'setMoveIndex',
         ],
     };

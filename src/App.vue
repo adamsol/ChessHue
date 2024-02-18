@@ -125,6 +125,7 @@
                 review_depth: electron.store.get('review_depth', 12),
                 auto_review: electron.store.get('auto_review', false),
                 review_progress: undefined,
+                move_evaluations: [],
                 move_colors: [],
             },
             computed: {
@@ -180,6 +181,7 @@
                     this.move_history = chess.history();
                     this.current_move_index = 0;
                     this.variation_move_index = 0;
+                    this.move_evaluations = [];
                     this.move_colors = [];
 
                     while (chess.undo()) {}
@@ -208,6 +210,7 @@
                         return;
                     }
 
+                    const evaluations = [];
                     const colors = [];
 
                     // Running the analysis backwards (starting from the last move) seems to make engine evaluations more consistent,
@@ -219,14 +222,14 @@
                         if (!this.reviewing) {
                             return;
                         }
+                        evaluations.push(engine_lines[0]?.score);
                         const grade = gradeMove(move, prev_engine_lines[0], engine_lines[0]);
                         colors.push(getColor(grade));
                         this.review_progress += 1;
 
-                        console.log(review_chess.moveNumber(), move.san, [...prev_engine_lines], [...engine_lines], grade);
-
                         engine_lines = prev_engine_lines;
                     }
+                    this.move_evaluations = evaluations.reverse();
                     this.move_colors = colors.reverse();
                     this.updateGround();
 
