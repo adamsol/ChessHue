@@ -1,5 +1,5 @@
 
-import tinycolor from '../node_modules/tinycolor2/esm/tinycolor.js';
+import tinycolor from 'tinycolor2';
 
 const ADVANTAGE_CUTOFF = 10;
 const SENSITIVITY_DIVIDER = 2.5;

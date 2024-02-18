@@ -1,7 +1,7 @@
 
-import { Chess, DEFAULT_POSITION } from '../node_modules/chess.js/dist/esm/chess.js';
-import Chessground from '../node_modules/chessground/index.js';
-import { computed as vue_computed, createApp } from '../node_modules/vue/dist/vue.esm-browser.js';
+import { Chess, DEFAULT_POSITION } from 'chess.js';
+import { Chessground } from 'chessground';
+import { computed as vue_computed, createApp } from 'vue/dist/vue.esm-bundler.js';
 
 import ActionPanel from './components/ActionPanel.js';
 import AnalysisPanel from './components/AnalysisPanel.js';
@@ -315,16 +315,17 @@ const app = createApp({
                     },
                 });
             },
-            playSound(san) {
+            async playSound(san) {
                 let name;
                 if (san.includes('x')) {
                     name = 'capture';
                 } else {
                     name = 'move';
                 }
-                const audio = new Audio(`../assets/sound/${name}.mp3`);
+                const sound_module = await import(`@/assets/sound/${name}.mp3`);
+                const audio = new Audio(sound_module.default);
                 audio.volume = 0.7;
-                audio.play();
+                await audio.play();
             },
             update() {
                 this.updateEvaluation();

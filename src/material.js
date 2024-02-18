@@ -1,7 +1,7 @@
 
-import { Chess } from '../node_modules/chess.js/dist/esm/chess.js';
+import { Chess } from 'chess.js';
 
-const PIECE_VALUES = { Q: 9, R: 5, B: 3, N: 3, P: 1 };
+export const PIECE_VALUES = { Q: 9, R: 5, B: 3, N: 3, P: 1 };
 
 
 export function calculateMaterialDifference(chess) {

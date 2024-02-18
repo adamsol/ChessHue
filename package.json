@@ -28,6 +28,8 @@
   },
   "scripts": {
     "test": "vitest",
+    "watch": "webpack --mode=development --watch",
+    "build": "webpack --mode=production",
     "start": "electron ."
   },
   "dependencies": {
@@ -38,7 +40,9 @@
     "electron-store": "^8.1.0",
     "lodash-es": "^4.17.21",
     "tinycolor2": "^1.6.0",
-    "vue": "^3.3.4"
+    "vue": "^3.3.4",
+    "webpack": "^5.90.2",
+    "webpack-cli": "^5.1.4"
   },
   "devDependencies": {
     "vitest": "^0.32.0"

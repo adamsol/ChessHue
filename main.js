@@ -32,5 +32,5 @@ app.whenReady().then(async () => {
     const live_analysis_engine = new Engine((...args) => window.webContents.send('evaluation-callback', ...args));
     ipcMain.handle('evaluate-for-live-analysis', async (event, ...args) => live_analysis_engine.evaluate(...args));
 
-    await window.loadFile('src/index.html');
+    await window.loadFile('index.html');
 });
