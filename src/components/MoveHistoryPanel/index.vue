@@ -6,7 +6,7 @@
             <MoveNode
                 :color="move_colors[i]"
                 :is_current="variation_move_index === 0 && current_move_index === i+1"
-                :san="san"
+                :san
                 @click="setMoveIndex('variation_move_index', 0); setMoveIndex('current_move_index', i+1)"
             />
         </template>
