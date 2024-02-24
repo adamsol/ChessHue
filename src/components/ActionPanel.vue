@@ -56,6 +56,17 @@
                     this.goForward();
                 }
             });
+            window.addEventListener('wheel', event => {
+                if (event.target.tagName === 'CG-BOARD') {
+                    if (event.deltaY > 0) {
+                        this.goForward();
+                    } else if (event.deltaY < 0) {
+                        this.goBackward();
+                    }
+                    // https://stackoverflow.com/questions/42101723/unable-to-preventdefault-inside-passive-event-listener
+                    event.preventDefault();
+                }
+            }, { passive: false });
         },
         methods: {
             goBackward() {
