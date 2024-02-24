@@ -1,49 +1,46 @@
 
 import tinycolor from 'tinycolor2';
 
-const ADVANTAGE_CUTOFF = 10;
-const SENSITIVITY_DIVIDER = 2.5;
+const SIGMOID_STEEPNESS = 0.4;
 const COLORS = [
     ['#23b728', 0],
-    ['#d59122', 0.5],
-    ['#d35338', 1],
-    ['#9439b9', 2],
+    ['#d59122', 0.3],
+    ['#d34a3e', 1],
+    ['#b356e0', 2],
 ];
 
 
-function determineRelativeAdvantage(score, color) {
+function estimateExpectedGameResult(score) {
     const value = score.startsWith('M') ? Infinity * Math.sign(+score.slice(1)) : +score;
-    return Math.max(Math.min(value, ADVANTAGE_CUTOFF), -ADVANTAGE_CUTOFF) * (color === 'w' ? 1 : -1);
+    return 1 / (1 + Math.exp(-value * SIGMOID_STEEPNESS));
 }
 
 if (import.meta.vitest) {
-    test('determineRelativeAdvantage', () => {
-        expect(determineRelativeAdvantage('1.0', 'w')).toBe(1);
-        expect(determineRelativeAdvantage('-4.75', 'b')).toBe(4.75);
-        expect(determineRelativeAdvantage('150', 'b')).toBe(-10);
-        expect(determineRelativeAdvantage('M1', 'w')).toBe(10);
-        expect(determineRelativeAdvantage('M-3', 'w')).toBe(-10);
-        expect(determineRelativeAdvantage('M-12', 'b')).toBe(10);
+    test('estimateExpectedGameResult', () => {
+        expect(estimateExpectedGameResult('0')).toBe(0.5);
+        expect(estimateExpectedGameResult('-1')).toBeCloseTo(0.4);
+        expect(estimateExpectedGameResult('3')).toBeCloseTo(0.77);
+        expect(estimateExpectedGameResult('-10')).toBeCloseTo(0.02);
+        expect(estimateExpectedGameResult('M5')).toBe(1);
+        expect(estimateExpectedGameResult('M-2')).toBe(0);
     });
 }
 
 
-function calculateLoss(prev_value, new_value) {
-    const diff = prev_value - new_value;
-    const divisor = Math.max(Math.abs(prev_value), Math.abs(new_value));
-    return diff / Math.max(divisor, SENSITIVITY_DIVIDER);
+export function calculateLoss(prev_score, new_score) {
+    return 2 * (estimateExpectedGameResult(prev_score) - estimateExpectedGameResult(new_score));
 }
 
 if (import.meta.vitest) {
     test('calculateLoss', () => {
-        expect(calculateLoss(1, 1)).toBe(0);
-        expect(calculateLoss(1, -1)).toBe(0.8);
-        expect(calculateLoss(5, -2)).toBe(1.4);
-        expect(calculateLoss(1.5, 0)).toBe(0.6);
-        expect(calculateLoss(0, -10)).toBe(1);
-        expect(calculateLoss(5, 3)).toBe(0.4);
-        expect(calculateLoss(8, -4)).toBe(1.5);
-        expect(calculateLoss(-2, -10)).toBe(0.8);
+        expect(calculateLoss('1', '1')).toBe(0);
+        expect(calculateLoss('1', '-1')).toBeCloseTo(0.39);
+        expect(calculateLoss('1.5', '0')).toBeCloseTo(0.29);
+        expect(calculateLoss('5', '3')).toBeCloseTo(0.22);
+        expect(calculateLoss('-2', '-10')).toBeCloseTo(0.58);
+        expect(calculateLoss('10', '0')).toBeCloseTo(0.96);
+        expect(calculateLoss('8', '-4')).toBeCloseTo(1.59);
+        expect(calculateLoss('M1', 'M-1')).toBe(2);
     });
 }
 
@@ -59,7 +56,7 @@ if (import.meta.vitest) {
             expect(blendColors(i, 1.0)).toBe(COLORS[i+1][0]);
         }
         expect(blendColors(0, 0.4)).toBe('#6aa826');
-        expect(blendColors(2, 0.7)).toBe('#a74192');
+        expect(blendColors(2, 0.7)).toBe('#bd52af');
     });
 }
 
@@ -76,7 +73,7 @@ export function getColor(loss) {
 if (import.meta.vitest) {
     test('getColor', () => {
         expect(getColor(0)).toBe(blendColors(0, 0.0));
-        expect(getColor(0.8)).toBe(blendColors(1, 0.6));
+        expect(getColor(0.8)).toBe(blendColors(1, 5/7));
         expect(getColor(2)).toBe(blendColors(2, 1.0));
     });
 }
@@ -92,9 +89,8 @@ export function gradeMove(move, prev_engine_line, new_engine_line) {
             new_engine_line = { score: '0' };  // Stalemate
         }
     }
-    const prev_value = determineRelativeAdvantage(prev_engine_line.score, move.color);
-    const new_value = determineRelativeAdvantage(new_engine_line.score, move.color);
-    return Math.max(calculateLoss(prev_value, new_value), 0);
+    const loss = calculateLoss(prev_engine_line.score, new_engine_line.score);
+    return Math.max(loss * (move.color === 'w' ? 1 : -1), 0);
 }
 
 if (import.meta.vitest) {
@@ -102,7 +98,8 @@ if (import.meta.vitest) {
         expect(gradeMove({ san: 'e4' }, { score: '1', move: {} }, { score: '1'})).toBe(0);
         expect(gradeMove({ san: 'e4', color: 'w' }, { score: '1', move: { san: 'e4' } }, { score: '-5' })).toBe(0);
         expect(gradeMove({ san: 'e4', color: 'b' }, { score: '1', move: {} }, { score: '-5' })).toBe(0);
-        expect(gradeMove({ san: 'e4', color: 'w' }, { score: '10', move: {} }, { score: '-2' })).toBe(1.2);
+        expect(gradeMove({ san: 'e4', color: 'w' }, { score: '10', move: {} }, { score: '-2' })).toBeCloseTo(1.34);
+        expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1', move: {} }, { score: '10' })).toBeCloseTo(0.04);
         expect(gradeMove({ san: 'e4', color: 'b' }, { score: 'M-1', move: {} }, { score: 'M1' })).toBe(2);
         expect(gradeMove({ san: 'e4#', color: 'b' }, { score: 'M-1', move: {} })).toBe(0);
         expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1', move: {} })).toBe(1);  // Stalemate
