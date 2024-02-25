@@ -29,7 +29,7 @@
     export default {
         inject: [
             'move_history', 'current_move_index', 'variation_move_index', 'board_flipped',
-            'move_colors', 'reviewing',
+            'move_evaluations', 'move_colors', 'reviewing',
             'makeMove', 'setMoveIndex', 'updateGround',
         ],
         mounted() {

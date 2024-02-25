@@ -16,6 +16,7 @@
         <div class="flex-column" style="flex-grow: 1; gap: 6px">
             <AnalysisPanel />
             <hr />
+            <ChartPanel />
             <MoveHistoryPanel />
             <ActionPanel />
             <ReviewPanel />
@@ -35,6 +36,7 @@
 
     import ActionPanel from './components/ActionPanel';
     import AnalysisPanel from './components/AnalysisPanel';
+    import ChartPanel from './components/ChartPanel';
     import LoadPanel from './components/LoadPanel';
     import MaterialDifferencePanel from './components/MaterialDifferencePanel';
     import MoveHistoryPanel from './components/MoveHistoryPanel/index';
@@ -59,7 +61,7 @@
     window.chess = new Chess();
 
     export default {
-        components: { ActionPanel, AnalysisPanel, LoadPanel, MaterialDifferencePanel, MoveHistoryPanel, ReviewPanel },
+        components: { ActionPanel, AnalysisPanel, ChartPanel, LoadPanel, MaterialDifferencePanel, MoveHistoryPanel, ReviewPanel },
         created() {
             // This needs to be non-reactive to avoid an update loop.
             this.board_size = electron.store.get('board_size', window.innerHeight * 0.7);
@@ -229,7 +231,7 @@
 
                         engine_lines = prev_engine_lines;
                     }
-                    this.move_evaluations = evaluations.reverse();
+                    this.move_evaluations = [...evaluations, engine_lines[0]?.score].reverse();
                     this.move_colors = colors.reverse();
                     this.updateGround();
 

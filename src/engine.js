@@ -38,11 +38,6 @@ export class Engine {
                 return;
             }
             const depth = +cmd[cmd.indexOf('depth')+1];
-            if (depth === 0) {
-                // Checkmate or stalemate.
-                this.resolve();
-                return;
-            }
             const score_pos = cmd.indexOf('score');
             if (score_pos === -1) {
                 return;
@@ -67,6 +62,11 @@ export class Engine {
 
     async evaluate(fen, { multipv = 1, depth = 20, prevent_repetitions = false } = {}) {
         this.chess = new Chess(fen);
+        if (this.chess.isCheckmate()) {
+            return [{ score: 'M' + (this.chess.turn() === 'w' ? '-' : '') + '0' }];
+        } else if (this.chess.isStalemate()) {
+            return [{ score: '0.0' }];
+        }
         this.engine_lines = [];
 
         this.ready_counter += 1;

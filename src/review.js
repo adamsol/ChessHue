@@ -11,7 +11,7 @@ const COLORS = [
 
 
 function estimateExpectedGameResult(score) {
-    const value = score.startsWith('M') ? Infinity * Math.sign(+score.slice(1)) : +score;
+    const value = score.startsWith('M') ? Infinity * (score[1] === '-' ? -1 : 1) : +score;
     return 1 / (1 + Math.exp(-value * SIGMOID_STEEPNESS));
 }
 
@@ -82,12 +82,6 @@ if (import.meta.vitest) {
 export function gradeMove(move, prev_engine_line, new_engine_line) {
     if (move.san === prev_engine_line.move.san) {
         new_engine_line = prev_engine_line;
-    } else if (!new_engine_line) {
-        if (move.san.endsWith('#')) {
-            new_engine_line = prev_engine_line;
-        } else {
-            new_engine_line = { score: '0' };  // Stalemate
-        }
     }
     const loss = calculateLoss(prev_engine_line.score, new_engine_line.score);
     return Math.max(loss * (move.color === 'w' ? 1 : -1), 0);
@@ -101,7 +95,7 @@ if (import.meta.vitest) {
         expect(gradeMove({ san: 'e4', color: 'w' }, { score: '10', move: {} }, { score: '-2' })).toBeCloseTo(1.34);
         expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1', move: {} }, { score: '10' })).toBeCloseTo(0.04);
         expect(gradeMove({ san: 'e4', color: 'b' }, { score: 'M-1', move: {} }, { score: 'M1' })).toBe(2);
-        expect(gradeMove({ san: 'e4#', color: 'b' }, { score: 'M-1', move: {} })).toBe(0);
-        expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1', move: {} })).toBe(1);  // Stalemate
+        expect(gradeMove({ san: 'e4#', color: 'b' }, { score: 'M-1', move: {} }, { score: 'M-0' })).toBe(0);
+        expect(gradeMove({ san: 'e4', color: 'w' }, { score: 'M1', move: {} }, { score: '0' })).toBe(1);
     });
 }
