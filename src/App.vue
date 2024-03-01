@@ -72,6 +72,9 @@
             let evaluation_callback_update_timeout;
 
             electron.setEvaluationCallback((engine_lines, depth) => {
+                if (!this.analysis_enabled) {
+                    return;
+                }
                 const length = this.engine_lines.length;
                 this.engine_lines = engine_lines;
                 this.engine_lines.length = length;
@@ -110,6 +113,7 @@
             data: {
                 material_difference: calculateMaterialDifference(new Chess()),
 
+                analysis_enabled: electron.store.get('analysis_enabled', true),
                 analysis_depth: electron.store.get('analysis_depth', 20),
                 analysis_multipv: electron.store.get('analysis_multipv', 3),
                 analysis_prevent_repetitions: electron.store.get('analysis_prevent_repetitions', false),
@@ -244,7 +248,7 @@
                     this.hovered_line_index = null;
 
                     electron.evaluateForLiveAnalysis(chess.fen(), {
-                        depth: this.analysis_depth,
+                        depth: this.analysis_enabled ? this.analysis_depth : 0,
                         multipv: this.analysis_multipv,
                         prevent_repetitions: this.analysis_prevent_repetitions,
                     });

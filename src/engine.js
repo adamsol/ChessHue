@@ -60,7 +60,11 @@ export class Engine {
         }
     }
 
-    async evaluate(fen, { multipv = 1, depth = 20, prevent_repetitions = false } = {}) {
+    async evaluate(fen, { depth = 20, multipv = 1, prevent_repetitions = false } = {}) {
+        this._write('stop');
+        if (depth <= 0 || multipv <= 0) {
+            return [];
+        }
         this.chess = new Chess(fen);
         if (this.chess.isCheckmate()) {
             return [{ score: 'M' + (this.chess.turn() === 'w' ? '-' : '') + '0' }];
@@ -68,9 +72,7 @@ export class Engine {
             return [{ score: '0.0' }];
         }
         this.engine_lines = [];
-
         this.ready_counter += 1;
-        this._write('stop');
         this._write('isready');
 
         let extra_moves_cmd = '';

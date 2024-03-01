@@ -1,6 +1,14 @@
 
 <template>
     <div class="flex-row" style="column-gap: 12px">
+        <label>
+            <input
+                v-model="analysis_enabled"
+                type="checkbox"
+                title="Toggle engine evaluation"
+                @change="updateEvaluation(); updateStore('analysis_enabled')"
+            />
+        </label>
         <div class="flex-row">
             Depth:
             <span style="width: 20px">
@@ -34,7 +42,7 @@
             Prevent repetitions
         </label>
     </div>
-    <div class="flex-column" style="align-items: start">
+    <div v-if="analysis_enabled" class="flex-column" style="align-items: start">
         <div v-for="(line, i) in engine_lines" style="height: 28px">
             <div
                 v-if="line"
@@ -53,7 +61,7 @@
 <script>
     export default {
         inject: [
-            'analysis_depth', 'analysis_multipv', 'analysis_prevent_repetitions',
+            'analysis_enabled', 'analysis_depth', 'analysis_multipv', 'analysis_prevent_repetitions',
             'current_depth', 'engine_lines', 'hovered_line_index',
             'makeMove', 'updateEvaluation', 'updateStore', 'updateGround',
         ],
