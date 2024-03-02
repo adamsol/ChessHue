@@ -1,7 +1,11 @@
 
 <template>
     <div class="flex-row">
-        <button @click="reviewing ? abortReview() : runReview()">
+        <button
+            :disabled="disabled"
+            :title="disabled ? 'Review can only be run for the main line.' : ''"
+            @click="reviewing ? abortReview() : runReview()"
+        >
             {{ reviewing ? 'Abort review' : 'Review' }}
         </button>
         Depth:
@@ -21,8 +25,14 @@
 <script>
     export default {
         inject: [
-            'move_history', 'review_depth', 'review_progress', 'reviewing',
+            'move_history', 'variation_move_index',
+            'review_depth', 'review_progress', 'reviewing',
             'runReview', 'abortReview', 'updateStore',
         ],
+        computed: {
+            disabled() {
+                return !this.reviewing && this.variation_move_index > 0;
+            },
+        },
     };
 </script>

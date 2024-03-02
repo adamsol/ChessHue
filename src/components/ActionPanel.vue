@@ -19,7 +19,11 @@
         <button @click="copyFen()">
             Copy FEN
         </button>
-        <button :disabled="reviewing" @click="resetMainLine()">
+        <button
+            :disabled="reviewing"
+            :title="reviewing ? 'Cannot reset the main line while review is in progress.' : ''"
+            @click="resetMainLine()"
+        >
             Reset main line
         </button>
     </div>
