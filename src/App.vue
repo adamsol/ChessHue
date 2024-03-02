@@ -58,6 +58,8 @@
         };
     }
 
+    const REVIEW_ESTIMATED_BRANCHING_FACTOR = 1.3;
+
     window.chess = new Chess();
 
     export default {
@@ -71,7 +73,7 @@
 
             let evaluation_callback_update_timeout;
 
-            electron.setEvaluationCallback((engine_lines, depth) => {
+            electron.setLiveAnalysisEvaluationCallback((engine_lines, depth) => {
                 if (!this.analysis_enabled) {
                     return;
                 }
@@ -200,10 +202,10 @@
                     }
                 },
                 async runReview() {
-                    if (this.move_history.length === 0) {
+                    if (this.move_history.length === 0 || this.review_depth <= 0) {
                         return;
                     }
-                    this.review_progress = 0;
+                    this.review_progress = [0, this.move_history.length + 1];
 
                     const review_chess = new Chess();
                     review_chess.load(chess.header().FEN ?? DEFAULT_POSITION);
@@ -211,10 +213,19 @@
                         review_chess.move(san);
                     }
                     const options = { depth: this.review_depth };
+
+                    electron.setMoveClassificationEvaluationCallback((engine_lines, depth) => {
+                        if (!this.reviewing) {
+                            return;
+                        }
+                        this.review_progress[0] = Math.floor(this.review_progress[0]) + 0.999 / Math.pow(REVIEW_ESTIMATED_BRANCHING_FACTOR, options.depth - depth);
+                    });
+
                     let engine_lines = await electron.evaluateForMoveClassification(review_chess.fen(), options);
                     if (!this.reviewing) {
                         return;
                     }
+                    this.review_progress[0] = 1;
 
                     const evaluations = [];
                     const colors = [];
@@ -231,7 +242,7 @@
                         evaluations.push(engine_lines[0]?.score);
                         const grade = gradeMove(move, prev_engine_lines[0], engine_lines[0]);
                         colors.push(getColor(grade));
-                        this.review_progress += 1;
+                        this.review_progress[0] = Math.floor(this.review_progress[0]) + 1;
 
                         engine_lines = prev_engine_lines;
                     }
@@ -240,6 +251,10 @@
                     this.updateGround();
 
                     await new Promise(r => setTimeout(r, 100));
+                    this.review_progress = undefined;
+                },
+                abortReview() {
+                    electron.evaluateForMoveClassification('', { depth: 0 });
                     this.review_progress = undefined;
                 },
                 updateEvaluation() {

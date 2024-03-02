@@ -1,7 +1,7 @@
 
 <template>
     <div class="flex-row">
-        <button @click="reviewing ? review_progress = undefined : runReview()">
+        <button @click="reviewing ? abortReview() : runReview()">
             {{ reviewing ? 'Abort review' : 'Review' }}
         </button>
         Depth:
@@ -14,7 +14,7 @@
         />
     </div>
     <div v-if="reviewing">
-        <progress :max="move_history.length" :value="review_progress" style="width: 100%" />
+        <progress :value="review_progress[0]" :max="review_progress[1]" style="width: 100%" />
     </div>
 </template>
 
@@ -22,7 +22,7 @@
     export default {
         inject: [
             'move_history', 'review_depth', 'review_progress', 'reviewing',
-            'runReview', 'updateStore',
+            'runReview', 'abortReview', 'updateStore',
         ],
     };
 </script>

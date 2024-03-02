@@ -26,10 +26,10 @@ app.whenReady().then(async () => {
 
     ipcMain.handle('get-protocol-url', () => decodeURIComponent(process.argv[2]?.split('://')[1] ?? ''));
 
-    const move_classification_engine = new Engine();
+    const move_classification_engine = new Engine((...args) => window.webContents.send('move-classification-evaluation-callback', ...args));
     ipcMain.handle('evaluate-for-move-classification', async (event, ...args) => move_classification_engine.evaluate(...args));
 
-    const live_analysis_engine = new Engine((...args) => window.webContents.send('evaluation-callback', ...args));
+    const live_analysis_engine = new Engine((...args) => window.webContents.send('live-analysis-evaluation-callback', ...args));
     ipcMain.handle('evaluate-for-live-analysis', async (event, ...args) => live_analysis_engine.evaluate(...args));
 
     await window.loadFile('index.html');
