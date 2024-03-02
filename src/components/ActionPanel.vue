@@ -102,10 +102,10 @@
             },
             resetMainLine() {
                 this.move_history = chess.history();
+                this.move_evaluations.splice(this.current_move_index + 1);
+                this.move_colors.splice(this.current_move_index);
                 this.current_move_index += this.variation_move_index;
                 this.variation_move_index = 0;
-                this.move_evaluations = [];
-                this.move_colors = [];
             },
         },
     };
