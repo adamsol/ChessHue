@@ -3,11 +3,25 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 import path from 'path';
 
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import initContextMenu from 'electron-context-menu';
 import Store from 'electron-store';
 
 import { Engine } from './src/engine.js';
+
+const app_menu_template = [
+    {
+        label: 'View',
+        submenu: [
+            { role: 'reload' }, { role: 'toggledevtools' },
+            { type: 'separator' },
+            { role: 'resetzoom' }, { role: 'zoomin' }, { role: 'zoomout' },
+            { type: 'separator' },
+            { role: 'togglefullscreen' },
+        ],
+    },
+];
+Menu.setApplicationMenu(Menu.buildFromTemplate(app_menu_template));
 
 initContextMenu();
 Store.initRenderer();
