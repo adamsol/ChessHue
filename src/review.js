@@ -2,16 +2,19 @@
 import tinycolor from 'tinycolor2';
 
 const SIGMOID_STEEPNESS = 0.4;
+
 const COLORS = [
-    ['#23b728', 0],
-    ['#d59122', 0.3],
-    ['#d34a3e', 1],
-    ['#b356e0', 2],
+    ['#23b700', 0],
+    ['#d59100', 0.4],
+    ['#d34a29', 1],
+    ['#b34aff', 2],
 ];
+const GAMMA = 2.2;
 
 
 function estimateExpectedGameResult(score) {
     const value = score.startsWith('M') ? Infinity * (score[1] === '-' ? -1 : 1) : +score;
+    // https://lichess.org/page/accuracy
     return 1 / (1 + Math.exp(-value * SIGMOID_STEEPNESS));
 }
 
@@ -46,7 +49,13 @@ if (import.meta.vitest) {
 
 
 function blendColors(i, t) {
-    return tinycolor.mix(COLORS[i][0], COLORS[i+1][0], t*100).toHexString();
+    const a = tinycolor(COLORS[i][0]).toRgb();
+    const b = tinycolor(COLORS[i+1][0]).toRgb();
+    for (const x of ['r', 'g', 'b']) {
+        // https://blog.johnnovak.net/2016/09/21/what-every-coder-should-know-about-gamma/
+        a[x] = Math.pow(Math.pow(a[x], GAMMA) * (1 - t) + Math.pow(b[x], GAMMA) * t, 1 / GAMMA);
+    }
+    return tinycolor(a).toHexString();
 }
 
 if (import.meta.vitest) {
@@ -55,8 +64,8 @@ if (import.meta.vitest) {
             expect(blendColors(i, 0.0)).toBe(COLORS[i][0]);
             expect(blendColors(i, 1.0)).toBe(COLORS[i+1][0]);
         }
-        expect(blendColors(0, 0.4)).toBe('#6aa826');
-        expect(blendColors(2, 0.7)).toBe('#bd52af');
+        expect(blendColors(0, 0.4)).toBe('#8ea900');
+        expect(blendColors(2, 0.7)).toBe('#bd4ada');
     });
 }
 
@@ -73,7 +82,7 @@ export function getColor(loss) {
 if (import.meta.vitest) {
     test('getColor', () => {
         expect(getColor(0)).toBe(blendColors(0, 0.0));
-        expect(getColor(0.8)).toBe(blendColors(1, 5/7));
+        expect(getColor(0.8)).toBe(blendColors(1, 2/3));
         expect(getColor(2)).toBe(blendColors(2, 1.0));
     });
 }
