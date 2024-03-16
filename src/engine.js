@@ -52,7 +52,7 @@ export class Engine {
                 this.chess.undo();
 
                 this.engine_lines[cmd[cmd.indexOf('multipv')+1]-1] = { score, move };
-                callback?.([...this.engine_lines], depth);
+                callback?.([...this.engine_lines], { depth, id: this.id });
             } catch {}
         }
         if (cmd[0] === 'bestmove') {
@@ -60,7 +60,7 @@ export class Engine {
         }
     }
 
-    async evaluate(fen, { depth = 20, multipv = 1, prevent_repetitions = false } = {}) {
+    async evaluate(fen, { depth = 20, multipv = 1, prevent_repetitions = false, id } = {}) {
         this._write('stop');
         if (depth <= 0 || multipv <= 0) {
             return [];
@@ -72,6 +72,7 @@ export class Engine {
             return [{ score: '0.0' }];
         }
         this.engine_lines = [];
+        this.id = id;
         this.ready_counter += 1;
         this._write('isready');
 

@@ -73,8 +73,8 @@
 
             let evaluation_callback_update_timeout;
 
-            electron.setLiveAnalysisEvaluationCallback((engine_lines, depth) => {
-                if (!this.analysis_enabled) {
+            electron.setLiveAnalysisEvaluationCallback((engine_lines, { depth, id }) => {
+                if (this.evaluation_id !== id) {
                     return;
                 }
                 const length = this.engine_lines.length;
@@ -121,6 +121,7 @@
                 analysis_prevent_repetitions: electron.store.get('analysis_prevent_repetitions', false),
                 engine_lines: [],
                 current_depth: 0,
+                evaluation_id: 0,
                 hovered_line_index: null,
 
                 pgn_or_fen: '',
@@ -214,7 +215,7 @@
                     }
                     const options = { depth: this.review_depth };
 
-                    electron.setMoveClassificationEvaluationCallback((engine_lines, depth) => {
+                    electron.setMoveClassificationEvaluationCallback((engine_lines, { depth }) => {
                         if (!this.reviewing) {
                             return;
                         }
@@ -266,6 +267,7 @@
                         depth: this.analysis_enabled ? this.analysis_depth : 0,
                         multipv: this.analysis_multipv,
                         prevent_repetitions: this.analysis_prevent_repetitions,
+                        id: ++this.evaluation_id,
                     });
                 },
                 updateGround() {
