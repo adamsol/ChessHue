@@ -7,7 +7,7 @@
                 <div
                     ref="chessground"
                     style="height: 0; padding-bottom: 100%; resize: horizontal; overflow: hidden"
-                    :style="{ width: board_size + 'px' }"
+                    :style="{ width: board_size + 'px', color: current_move_color ?? 'transparent' }"
                 />
             </div>
             <MaterialDifferencePanel :color="board_flipped ? 'black' : 'white'" />

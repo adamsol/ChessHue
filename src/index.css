@@ -83,7 +83,7 @@ cg-board {
 }
 
 .last-move.last-move {
-    background-color: #7fb01c;
+    background-color: currentColor;
     opacity: 40%;
 }
 
