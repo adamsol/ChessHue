@@ -1,6 +1,6 @@
 {
-  "name": "chess-analyser",
-  "productName": "ChessAnalyser",
+  "name": "chess-hue",
+  "productName": "ChessHue",
   "version": "0.1.0",
   "description": "GUI for analysis of chess games, with automatic move classification.",
   "keywords": [
@@ -20,7 +20,7 @@
     "vue",
     "javascript"
   ],
-  "repository": "https://github.com/adamsol/ChessAnalyser",
+  "repository": "https://github.com/adamsol/ChessHue",
   "license": "GPL-3.0",
   "author": {
     "name": "Adam Sołtysik",
