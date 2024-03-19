@@ -67,8 +67,14 @@
         ],
         mounted() {
             _.addKeydownListener(event => {
-                if (/^\d$/.test(event.key)) {
-                    const line = this.engine_lines[+event.key - 1];
+                let index;
+                if (event.key === ' ') {
+                    index = 0;
+                } else if (/^\d$/.test(event.key)) {
+                    index = +event.key - 1;
+                }
+                if (index !== undefined) {
+                    const line = this.engine_lines[index];
                     if (line) {
                         this.makeMove(line.move.san);
                     }
