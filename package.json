@@ -2,7 +2,7 @@
   "name": "chess-hue",
   "productName": "ChessHue",
   "version": "0.1.0",
-  "description": "GUI for analysis of chess games, with automatic move classification.",
+  "description": "GUI for analysis of chess games, with automatic move grading.",
   "keywords": [
     "chess",
     "board",
