@@ -1,7 +1,7 @@
 
 <template>
     <div
-        v-if="move_evaluations.length > 0"
+        v-if="move_evaluations.length > 1"
         style="width: 100%; height: 150px; background: #333"
     >
         <LineChart
