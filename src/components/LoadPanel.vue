@@ -1,14 +1,7 @@
 
 <template>
     <div>
-        <textarea
-            v-model.trim="pgn_or_fen"
-            rows="10"
-            placeholder="PGN or FEN"
-            spellcheck="false"
-            style="font-family: inherit; width: 100%; resize: vertical"
-        />
-        <div class="flex-row" style="column-gap: 12px">
+        <div class="flex-row" style="column-gap: 12px; margin-bottom: 4px">
             <button :disabled="reviewing" @click="load()">
                 Load
             </button>
@@ -21,6 +14,13 @@
                 Auto review
             </label>
         </div>
+        <textarea
+            v-model.trim="pgn_or_fen"
+            rows="10"
+            placeholder="PGN or FEN"
+            spellcheck="false"
+            style="font-family: inherit; width: 100%; resize: vertical"
+        />
     </div>
 </template>
 
