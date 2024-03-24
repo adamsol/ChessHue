@@ -39,7 +39,7 @@
     import ChartPanel from './components/ChartPanel';
     import LoadPanel from './components/LoadPanel';
     import MaterialDifferencePanel from './components/MaterialDifferencePanel';
-    import MoveHistoryPanel from './components/MoveHistoryPanel/index';
+    import MoveHistoryPanel from './components/MoveHistoryPanel';
     import ReviewPanel from './components/ReviewPanel';
 
     function provideReactively({ data = {}, computed = {}, methods = {} }) {
