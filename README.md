@@ -62,7 +62,7 @@ To analyse your games in ChessHue right after they end:
      ```js
      document.addEventListener('keydown', e => {
          if (e.key === 'l' && document.querySelector('.game-review-buttons-component')) {
-             const nodes = document.querySelectorAll('wc-vertical-move-list [data-ply].node');
+             const nodes = document.querySelectorAll('.main-line-ply');
              if (nodes.length > 0) {
                  const moves = [...nodes].map(e => e.textContent);
                  const clock = document.querySelector('.clock-bottom');
