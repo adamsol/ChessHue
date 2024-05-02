@@ -8,7 +8,6 @@ import { Chess } from 'chess.js';
 
 import { generateRepetition } from './repetition.js';
 
-// https://stackoverflow.com/a/50053801
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class Engine {

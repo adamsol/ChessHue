@@ -2,12 +2,15 @@
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import initContextMenu from 'electron-context-menu';
 import Store from 'electron-store';
 
 import { Engine } from './src/engine.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app_menu_template = [
     {
@@ -32,6 +35,7 @@ app.whenReady().then(async () => {
             preload: path.join(app.getAppPath(), 'preload.cjs'),
             sandbox: false,  // https://github.com/sindresorhus/electron-store/issues/268#issuecomment-1809555869
         },
+        icon: path.join(__dirname, 'img/logo.jpg'),
     });
     window.maximize();
 

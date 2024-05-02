@@ -1,11 +1,13 @@
-ChessHue
-========
+<div align="center">
+    <h1>ChessHue</h1>
+    <img alt="Logo" src="img/logo.jpg" width="200" />
+</div>
 
 ### GUI for analysis of chess games, with automatic move grading. ###
 
 Created to make post-game analysis as convenient as in the browser, but faster.
 
-![](img/app.png)
+![Screenshot](img/app.png)
 
 
 Unique features
