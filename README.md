@@ -50,7 +50,7 @@ Running from the browser
 ------------------------
 
 After ChessHue is run once, the next time it can be started using the `chess://` protocol.
-You can pass your PGN in the URL, like `chess://e4 e5/`.
+You can pass your PGN in the URL, like `chess://e4_e5/`.
 
 To analyse your games in ChessHue right after they end:
 
@@ -66,10 +66,10 @@ To analyse your games in ChessHue right after they end:
          if (e.key === 'l' && document.querySelector('.game-review-buttons-component')) {
              const nodes = document.querySelectorAll('.main-line-ply');
              if (nodes.length > 0) {
-                 const moves = [...nodes].map(e => e.textContent);
+                 const moves = [...nodes].map(e => e.textContent.trim());
                  const clock = document.querySelector('.clock-bottom');
                  const color = clock.classList.contains('clock-black') ? 'b' : 'w';
-                 const url = `chess://${moves.join(' ')}/${color}`;
+                 const url = `chess://${moves.join('_')}/${color}`;
                  window.open(url.replace('#', '%23'), '_blank');
              }
          }
@@ -83,10 +83,10 @@ To analyse your games in ChessHue right after they end:
          if (e.key === 'l' && document.querySelector('.rematch')) {
              const nodes = document.querySelectorAll('l4x kwdb');
              if (nodes.length > 0) {
-                 const moves = [...nodes].map(e => e.textContent);
+                 const moves = [...nodes].map(e => e.textContent.trim());
                  const clock = document.querySelector('.rclock-bottom');
                  const color = clock.classList.contains('rclock-black') ? 'b' : 'w';
-                 const url = `chess://${moves.join(' ')}/${color}`;
+                 const url = `chess://${moves.join('_')}/${color}`;
                  window.open(url.replace('#', '%23').replace(/½\?/g, ''), '_blank');
              }
          }

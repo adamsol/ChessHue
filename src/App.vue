@@ -91,7 +91,7 @@
             const url = await electron.getProtocolUrl();
             if (url) {
                 const [pgn_or_fen, color] = url.split('/');
-                this.pgn_or_fen = pgn_or_fen;
+                this.pgn_or_fen = pgn_or_fen.replace(/_/g, ' ');
                 if (color[0] === 'b') {
                     this.board_flipped = true;
                 }
